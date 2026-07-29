@@ -1,5 +1,6 @@
 package com.payflow_engine.api.controllers;
 
+import com.payflow_engine.api.annotations.Idempotent;
 import com.payflow_engine.api.dtos.TransferRequestDTO;
 import com.payflow_engine.api.dtos.TransferResponseDTO;
 import com.payflow_engine.domain.services.TransferService;
@@ -21,6 +22,7 @@ public class TransferController {
         this.service = service;
     }
 
+    @Idempotent
     @PostMapping
     public ResponseEntity<TransferResponseDTO> transfer(@Valid @RequestBody TransferRequestDTO request){
         TransferResponseDTO transfer = service.transfer(request);
