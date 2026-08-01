@@ -36,7 +36,7 @@ public class TransferService {
         User payee = userRepository.findById(request.payeeId()).orElseThrow(() -> new IllegalArgumentException("Recebedor não encontrado."));
 
         if(payer.getUserType() == UserType.LOJISTA){
-            throw new IllegalArgumentException("Lojistas não estão autorizados a realizar transferências.");
+            throw new IllegalStateException("Lojistas não estão autorizados a realizar transferências.");
         }
 
         Wallet firstLock = payer.getWallet().getId() < payee.getWallet().getId() ? payer.getWallet() : payee.getWallet();
