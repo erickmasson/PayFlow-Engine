@@ -1,5 +1,6 @@
 package com.payflow_engine.domain.services;
 
+import com.payflow_engine.domain.entities.User;
 import com.payflow_engine.domain.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
