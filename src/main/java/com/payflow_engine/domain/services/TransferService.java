@@ -1,5 +1,6 @@
 package com.payflow_engine.domain.services;
 
+import com.payflow_engine.api.dtos.NotificationEventDTO;
 import com.payflow_engine.api.dtos.TransferRequestDTO;
 import com.payflow_engine.api.dtos.TransferResponseDTO;
 import com.payflow_engine.domain.entities.Transaction;
@@ -10,6 +11,7 @@ import com.payflow_engine.domain.enums.UserType;
 import com.payflow_engine.domain.repositories.TransactionRepository;
 import com.payflow_engine.domain.repositories.UserRepository;
 import com.payflow_engine.domain.repositories.WalletRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +20,13 @@ public class TransferService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final WalletRepository walletRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public TransferService(UserRepository userRepository, TransactionRepository transactionRepository, WalletRepository walletRepository) {
+    public TransferService(UserRepository userRepository, TransactionRepository transactionRepository, WalletRepository walletRepository, RabbitTemplate rabbitTemplate) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Transactional
@@ -62,6 +66,19 @@ public class TransferService {
         transaction.setStatus(TransactionStatus.SUCCESS);
 
         transaction = transactionRepository.save(transaction);
+
+        // ---- mensageria
+        NotificationEventDTO eventDTO = new NotificationEventDTO(
+                transaction.getId(),
+                payer.getEmail(),
+                payee.getEmail(),
+                transaction.getAmount()
+        );
+
+        rabbitTemplate.convertAndSend("notification.exchange", "notification.routing.key", eventDTO);
+        System.out.println("Evento de notificação publicado na fila!");
+        //----- fim mensageria
+
 
         return TransferResponseDTO.fromEntity(transaction);
     }

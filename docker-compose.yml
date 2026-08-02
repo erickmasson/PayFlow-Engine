@@ -19,5 +19,12 @@ services:
     ports:
       - "6379:6379"
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: payflow-rabbitmq
+    ports:
+      - "5672:5672" # porta da aplicação( TCP)
+      - "15672:15672" # porta do painel adm (web)
+
 volumes:
   postgres_data:
